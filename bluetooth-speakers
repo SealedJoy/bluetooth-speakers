@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# path to folder containing this script and connect / disconnect scripts 
+path_to_folder=/home/sealyj/projects/bluetooth-speakers
+# hint: use `pactl list` to find output devices
+builtin_sound_output="alsa_output.pci-0000_00_14.2.analog-stereo"
+# hint: use bluetoothctl prompt command "scan on" or autocomplete connect command
+#bedroom: 
+# bluetooth_speakers_mac="B8:27:EB:D5:1A:57"
+# roses levelboxslim
+bluetooth_speakers_mac="A0:60:90:0B:8E:E6"
+
+connect(){
+	$path_to_folder/connect-speakers.sh $bluetooth_speakers_mac | bluetoothctl
+	#cat /tmp/bluetooth-speakers.log
+	rm -rf /tmp/bluetooth-speakers.log
+	sleep 1.5
+	pactl set-sink-mute $builtin_sound_output true
+}
+
+disconnect(){
+	$path_to_folder/disconnect-speakers.sh $bluetooth_speakers_mac | bluetoothctl
+	pactl set-sink-mute $builtin_sound_output false
+}
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then
+	#while true; do sleep 1 ; done
+	echo -e "usage:\n
+	bsp [OPTION]\n
+	------------\n
+	-h	show this help
+	-c	connect
+	-d	disconnet"
+elif [ "$1" == "-c" ] || [ "$1" == "--connect" ] ; then
+	connect
+elif [ "$1" == "-d" ] || [ "$1" == "--disconnect" ] ; then
+	disconnect
+else
+	connect
+fi
